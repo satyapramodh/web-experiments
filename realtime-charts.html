@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Pramodh - realtime charts</title>
+  <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css">
+
+
+  <style>
+    .tooltip{
+      display: none;
+    }
+    .heading{
+      font-size: 22px;
+      height: 100px;
+      text-align: center;
+    }
+    .block{
+      width: 100%; display: block; clear:both; width: 100%; display: block; clear:both;
+    }
+    .slider-content{
+      width: 45%; margin: 15px; float: left;
+    }
+    .chart-canvas{
+      height: 250px; width: 30%; float: left; padding: 15px;
+    }
+  </style>
+
+
+  <script type="text/javascript">
+    // init values
+    var aData = [{x: 1, y: 500}];
+    var bData = [{x: 1, y: 300}];
+    var cData = [{x: 1, y: 400}];
+    var updateInterval = 100; // 100ms
+    var xVal = 0;
+    var colors = {
+      plotAContainer: "#4661EE",
+      plotBContainer: "#1BCDD1",
+      plotCContainer: "#23BFAA"
+    }
+
+    // init charts
+    function initChart(id, title, dataPoints){
+      var chart = new CanvasJS.Chart(id,
+      {
+        title:{
+          text: title
+        },
+        animationEnabled: true,
+        data: [
+          {
+            type: "splineArea",
+            color: colors[id],
+            dataPoints: dataPoints
+          }
+        ]
+      });
+
+      chart.render();
+      return chart;
+    }
+
+    // update charts with form data
+    var updatePointsFromForm = function (id, dataPoints) {
+      yVal = parseInt($(id).val());
+      dataPoints.push({x: xVal,y: yVal,});
+
+      if (dataPoints.length > 10 ) { dataPoints.shift(); }
+    };
+
+    // update chart with form computation
+    function updatePlotC(inputA, inputB, dataPoints){
+      a = parseInt($(inputA).val());
+      b = parseInt($(inputB).val());
+      yVal = (a+b)/2;
+      dataPoints.push({x: xVal,y: yVal,});
+
+      if (dataPoints.length > 10 ) { dataPoints.shift(); }
+    }
+
+    window.onload = function () {
+      // load charts
+      var chartA = initChart("plotAContainer", "Plot A", aData);
+      var chartB = initChart("plotBContainer", "Plot B", bData);
+      var chartC = initChart("plotCContainer", "Plot C", cData);
+
+      // load sliders
+      $("#inputA").slider();
+      $("#inputA").on("slide", function(slideEvt) {
+        $("#inputASliderVal").text(slideEvt.value);
+      });
+
+      $("#inputB").slider();
+      $("#inputB").on("slide", function(slideEvt) {
+        $("#inputBSliderVal").text(slideEvt.value);
+      });
+
+      // load interval data
+      setInterval(function(){
+        xVal++;
+        updatePointsFromForm("#inputA", aData);
+        updatePointsFromForm("#inputB", bData);
+        updatePlotC("#inputA", "#inputB", cData);
+
+        chartA.render();
+        chartB.render();
+        chartC.render();
+      }, updateInterval);
+    }
+
+  </script>
+</head>
+
+<body>
+  <div class="heading">
+    Realtime charts by Pramodh
+  </div>
+  <div class="block">
+    <div class="slider-content">
+      <input id="inputA" type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="500" />
+      <span id="inputACurrentSliderValLabel">A is <span id="inputASliderVal">500</span></span>
+    </div>
+    <div class="slider-content">
+      <input id="inputB" type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="300" />
+      <span id="inputBCurrentSliderValLabel">B is <span id="inputBSliderVal">300</span></span>
+    </div>
+  </div>
+
+  <div class="block">
+    <div id="plotAContainer" class="chart-canvas"></div>
+    <div id="plotBContainer" class="chart-canvas"></div>
+    <div id="plotCContainer" class="chart-canvas"></div>
+  </div>
+</body>
+</html>
+
